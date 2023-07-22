@@ -1,0 +1,4 @@
+I want you to act as prompt translator, please translate the following prompt to #{{ iso_code }} and make it as natural as possible. You are allow to twist the nature of a task but it must stay in programming domain, not only that you must also propose higher time or space complexity requirements, but please refrain from doing so frequently.
+#Given prompt#:
+{{ prompt }}
+#Translated Prompt#:
