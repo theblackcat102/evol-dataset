@@ -63,14 +63,15 @@ class EvolInstruction:
         else:
             raise ValueError("doesnt support")
 
-    def cache_result(self, new_prompt, res, task, input):
-        with open(self.cache_file, "r") as fout:
+    def cache_result(self, new_prompt, res, task, input, curr_round):
+        with open(self.cache_file, "a") as fout:
             fout.write(
                 json.dumps(
                     {
                         "uuid": str(uuid.uuid4().hex),
                         "input": input,
                         "new_prompt": new_prompt,
+                        "round": curr_round,
                         "response": res,
                         "task": task,
                     }
@@ -82,41 +83,47 @@ class EvolInstruction:
         self, texts, project_name, num_rounds=5, strategy="all", total_augment=-1
     ):
         cache_file = project_name + ".jsonl"
-        starting_round = 0
         added = set()
         if total_augment <= 0:
             total_augment = int(len(texts) * 2)
+        curr_round = 0
         if os.path.exists(cache_file):
             with open(cache_file, "r") as f:
                 for line in f:
                     payload = json.loads(line)
-                    starting_round = max(starting_round, payload["round"])
+                    curr_round = max(curr_round, payload["round"])
                     added.add(payload["input"])
                     added.add(payload["new_prompt"])
+                    total_augment -= 1
         self.cache_file = cache_file
         available_task = self.get_strategy(strategy)
-
-        for text in tqdm(texts, dynamic_ncols=True):
-            if text not in added:
-                new_prompt, res, task = self.augment(text, available_task)
-                if reject_response(new_prompt):
-                    continue
-                self.cache_result(new_prompt, res, task, text)
-            total_augment -= 1
-
-        with tqdm(total=total_augment, dynamic_ncols=True) as pbar:
-            while len(added):
-                input_text = next(iter(added))
-                new_prompt, res, task = self.augment(input_text, available_task)
-                if reject_response(new_prompt):
-                    continue
-                self.cache_result(new_prompt, res, task, input_text)
-                added.remove(input_text)
-                added.add(new_prompt)
-                pbar.update(1)
+        if curr_round > 0:
+            for text in tqdm(texts, dynamic_ncols=True):
+                if text not in added:
+                    new_prompt, res, task = self.augment(text, available_task)
+                    if reject_response(new_prompt):
+                        # we will try it in the next round
+                        added.add(text)
+                        continue
+                    self.cache_result(new_prompt, res, task, text, curr_round)
+                    added.add(new_prompt)
                 total_augment -= 1
-                if total_augment == 0:
-                    break
+            curr_round += 1
+
+        if total_augment > 0:
+            with tqdm(total=total_augment, dynamic_ncols=True) as pbar:
+                while len(added):
+                    input_text = next(iter(added))
+                    new_prompt, res, task = self.augment(input_text, available_task)
+                    if reject_response(new_prompt):
+                        continue
+                    self.cache_result(new_prompt, res, task, input_text, curr_round)
+                    added.remove(input_text)
+                    added.add(new_prompt)
+                    pbar.update(1)
+                    total_augment -= 1
+                    if total_augment == 0:
+                        break
         print("augmentation finished!")
         augmented = []
         with open(self.cache_file, "r") as f:
