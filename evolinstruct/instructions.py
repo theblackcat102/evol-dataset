@@ -25,7 +25,7 @@ def render_template(template, context):
     return template.render(context)
 
 
-def elimination_response(response):
+def reject_response(response):
     if len(response) < 30:
         return True
     if "sorry" in response.lower() or "抱歉" in response.lower():
