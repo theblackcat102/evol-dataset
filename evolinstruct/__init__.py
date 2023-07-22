@@ -99,6 +99,8 @@ class EvolInstruction:
         for text in tqdm(texts, dynamic_ncols=True):
             if text not in added:
                 new_prompt, res, task = self.augment(text, available_task)
+                if reject_response(new_prompt):
+                    continue
                 self.cache_result(new_prompt, res, task, text)
             total_augment -= 1
 
@@ -106,6 +108,8 @@ class EvolInstruction:
             while len(added):
                 input_text = next(iter(added))
                 new_prompt, res, task = self.augment(input_text, available_task)
+                if reject_response(new_prompt):
+                    continue
                 self.cache_result(new_prompt, res, task, input_text)
                 added.remove(input_text)
                 added.add(new_prompt)
