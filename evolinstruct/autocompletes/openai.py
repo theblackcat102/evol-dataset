@@ -101,6 +101,7 @@ class OpenAICompletion:
 
                 # response = chatbot.ask(row['question'])
                 elapsed = time() - start
+                response["elapsed"] = elapsed
                 success = True
             except Exception as e:
                 print("fallback", e)
@@ -153,9 +154,10 @@ class OpenAICompletion:
                 r = requests.post(
                     url,
                     headers={
-                        "api-key": openai.api_key,
+                        "api-key": self.azure_api_key,
                         "Content-Type": "application/json",
                     },
+                    params={"api-version": self.azure_api_version},
                     json=payload,
                 )
                 response = json.loads(r.text)

@@ -97,7 +97,8 @@ class EvolInstruction:
                     total_augment -= 1
         self.cache_file = cache_file
         available_task = self.get_strategy(strategy)
-        if curr_round > 0:
+
+        if curr_round <= 0:
             for text in tqdm(texts, dynamic_ncols=True):
                 if text not in added:
                     new_prompt, res, task = self.augment(text, available_task)
