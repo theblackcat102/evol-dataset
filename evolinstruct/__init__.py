@@ -5,7 +5,6 @@ import random
 from tqdm import tqdm
 from typing import List, Optional, Union
 from .instructions import create_prompt, reject_response
-from .autocompletes.openai import OpenAICompletion
 
 
 class EvolInstruction:
@@ -16,7 +15,13 @@ class EvolInstruction:
     def __init__(self, model_name, backend="openai", backend_settings={}) -> None:
         self.model_name = model_name
         if backend == "openai":
+            from .autocompletes.openai import OpenAICompletion
+
             self.backend = OpenAICompletion(**backend_settings)
+        elif backend == "anthropic":
+            from .autocompletes.anthropic import ClaudeCompletion
+
+            self.backend = ClaudeCompletion(**backend_settings)
         elif backend == "test":
             self.backend = None
         else:
@@ -109,6 +114,8 @@ class EvolInstruction:
                     self.cache_result(new_prompt, res, task, text, curr_round)
                     added.add(new_prompt)
                 total_augment -= 1
+                if (-1 * total_augment) >= len(texts):
+                    break
             curr_round += 1
 
         if total_augment > 0:

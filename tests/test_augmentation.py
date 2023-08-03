@@ -8,3 +8,11 @@ if __name__ == "__main__":
         backend_settings={"api_key": os.getenv("OPENAI_KEY")},
     )
     res = evol.augment("Hi how are you?", ["addition", "breath", "complexity"])
+    print(res)
+    evol = EvolInstruction(
+        model_name="claude-1.3",
+        backend="anthropic",
+        backend_settings={"api_key": os.getenv("ANTHROPIC_API_KEY")},
+    )
+    res = evol.augment("Hi how are you?", ["addition", "breath", "complexity"])
+    print(res)
