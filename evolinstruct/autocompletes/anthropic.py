@@ -1,5 +1,5 @@
 """
-Hack code to support both openai platform and azure dedicated pricing
+Hack code to support anthropic and make it looks like openai
 """
 import logging
 
