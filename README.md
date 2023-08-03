@@ -39,8 +39,6 @@ TODO:
 
 [ ] create datasets supported library, able to augment any hf datasets
 
-[ ] support gpt-4 and claude models
-
 [ ] add probabilistic markov chain for state transition as in Xu, Can et al (original wizardlm only have determinstic transition )
 
 
