@@ -21,7 +21,7 @@ def format_for_chat_completion(prompt):
             prefix = HUMAN_PROMPT if idx % 2 == 0 else AI_PROMPT
             messages.append(f"{prefix} {p}")
         last_idx = idx + 1
-        postfix = AI_PROMPT if idx % 2 == 0 else HUMAN_PROMPT
+        postfix = AI_PROMPT if last_idx % 2 == 0 else HUMAN_PROMPT
         payload = " ".join(messages) + " " + postfix
     return payload
 
